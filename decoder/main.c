@@ -8,15 +8,6 @@ const char* signature = "\x89PNG\x0D\x0A\x1a\x0A";
 
 //File testing
 
-/*void read_file(const char* path){
-    int buffer_size = 256;
-    char *buffer;
-    buffer = malloc(sizeof(buffer) * buffer_size);
-    FILE *file = fopen(path, "r");
-    char data = fread(buffer, 256, 1, file);
-    printf("%s", data);
-}*/
-
 int main(int argc, char **argv){
     printf("%s\n", path);
     FILE *fp = fopen(path, "rb");

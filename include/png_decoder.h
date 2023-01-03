@@ -8,6 +8,13 @@ typedef struct chunk_t{
     unsigned int crc;
 } chunk_t;
 
+typedef struct pixel_t{
+    char r;
+    char g;
+    char b;
+    char a;
+} pixel_t;
+
 //File reading
 
 int check_file_existance(FILE*);

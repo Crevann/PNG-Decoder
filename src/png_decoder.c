@@ -48,7 +48,7 @@ chunk_t *read_chunk(FILE *fp){
     
     //Gather data
 
-    char *chunk_data = malloc(chunk_length);
+    unsigned char *chunk_data = malloc(chunk_length);
     fread(chunk_data, chunk_length, 1, fp); //Data
     printf("Data: ");
     for (int i = 0; i < chunk_length; i++){

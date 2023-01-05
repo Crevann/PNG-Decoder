@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "png_decoder.h"
+#include "zlib.h"
 
 const char* path = ".\\image\\palette.png";
 const char* signature = "\x89PNG\x0D\x0A\x1a\x0A";
@@ -15,6 +17,11 @@ char color_type; //Currently not used
 char compression_method; //Currently not used
 char filter_method; //Currently not used
 char interlace_method; //Currently not used
+
+//Decompression
+
+static alloc_func zalloc = (alloc_func)0;
+static free_func zfree = (free_func)0;
 
 int main(int argc, char **argv){
     printf("%s\n", path);
@@ -38,7 +45,7 @@ int main(int argc, char **argv){
         printf("%s ", chunks[i]->chunk_type);
     }
 
-    //Read IHDR chunk to get image sizes
+    //Read IHDR chunk to get image sizes, IHDR is always the first chunk
     chunk_t *IHDR_chunk = chunks[0];
     char width_data[] = {IHDR_chunk->chunk_data[0], IHDR_chunk->chunk_data[1], IHDR_chunk->chunk_data[2], IHDR_chunk->chunk_data[3]};
     width = big_endian_to_integer(width_data, 4);
@@ -48,15 +55,28 @@ int main(int argc, char **argv){
     
     //Gather IDAT data
     pixel_t *pixels = malloc(sizeof(pixel_t) * (width * height));
-    chunk_t *IDAT_chunk = chunks[3];
-    int p = 0;
-    for (int i = 0; i < IDAT_chunk->length; i = i + 4){
-        pixels[p].r = IDAT_chunk->chunk_data[i];
-        pixels[p].g = IDAT_chunk->chunk_data[i + 1];
-        pixels[p].b = IDAT_chunk->chunk_data[i + 2];
-        pixels[p].a = IDAT_chunk->chunk_data[i + 3];
-        printf("%d %d %d %d \n", pixels[p].r, pixels[p].g, pixels[p].b, pixels[p].a);
-        p++;
+    chunk_t *IDAT_chunk = chunks[2];
+
+    //Decompression
+    unsigned long uncompressed_size = ((width * height) * 4) + height;
+    unsigned char* uncompressed_data = malloc(uncompressed_size);
+    
+    //printf("%s\n", IDAT_chunk->chunk_data);
+    for (int i = 0; i < IDAT_chunk->length; i++){
+        printf("%X ", IDAT_chunk->chunk_data[i]);
+    }
+    int result = uncompress(uncompressed_data, &uncompressed_size, IDAT_chunk->chunk_data, IDAT_chunk->length);
+    if (result != Z_OK)
+    {
+        printf("unable to uncompress: error %d\n", result);
+        free(uncompressed_data);
+        return -1;
+    }
+    
+    printf("\n");
+    for (size_t i = 0; i < uncompressed_size; i++)
+    {
+        printf("%X ", uncompressed_data[i]);
     }
     
 }

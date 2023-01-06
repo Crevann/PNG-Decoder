@@ -8,6 +8,7 @@
 #define LENGTH_BYTES 4
 #define TYPE_BYTES 4
 #define CRC_BYTES 4
+#define BYTES_PIXEL 4
 
 //Checks if the file is valid
 int check_signature(FILE* fp, const char* signature){
@@ -90,4 +91,45 @@ int big_endian_to_integer(char values[], size_t size){
         value += values[i] << (size - 1 - i) * 8;
     }
     return value;
+}
+
+//Reconstruction functions
+
+int paeth_prediction(int a, int b, int c){
+    int p = a + b - c;
+    int pa = abs(p - a);
+    int pb = abs(p - b);
+    int pc = abs(p - c);
+    if(pa <= pb && pa <= pc){
+        return a;
+    }else if(pb <= pc){
+        return b;
+    }else{
+        return c;
+    }
+};
+
+unsigned char recon_a(unsigned char* recon, int stride, int r, int c){
+    if(c >= BYTES_PIXEL){
+        return recon[r * stride + c - BYTES_PIXEL];
+    }else{
+        return 0;
+    }
+        
+}
+
+unsigned char recon_b(unsigned char* recon, int stride, int r, int c){
+    if(r > 0){
+        return recon[(r - 1) * stride + c];
+    }else{
+        return 0;
+    }
+}
+
+unsigned char recon_c(unsigned char* recon, int stride, int r, int c){
+    if(r > 0 && c >= BYTES_PIXEL){
+        return recon[(r - 1) * stride + c - BYTES_PIXEL];
+    }else{
+        return 0;
+    }
 }

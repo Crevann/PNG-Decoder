@@ -54,11 +54,10 @@ int main(int argc, char **argv){
     printf("\n%d %d\n", width, height);
     
     //Gather IDAT data
-    pixel_t *pixels = malloc(sizeof(pixel_t) * (width * height));
     chunk_t *IDAT_chunk = chunks[2];
 
     //Decompression
-    unsigned long uncompressed_size = ((width * height) * 4) + height;
+    unsigned long uncompressed_size = ((width * height) * BYTES_PIXEL) + height;
     unsigned char* uncompressed_data = malloc(uncompressed_size);
     
     //printf("%s\n", IDAT_chunk->chunk_data);
@@ -79,4 +78,7 @@ int main(int argc, char **argv){
         printf("%X ", uncompressed_data[i]);
     }
     
+    //Pixel reconstruction
+    unsigned char *reconstructed_pixels = malloc(sizeof(unsigned char) * (width * height));
+    int stride = width * BYTES_PIXEL;
 }

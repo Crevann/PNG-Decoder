@@ -2,6 +2,14 @@
 
 #define BYTES_PIXEL 4
 
+typedef enum filter_types{
+    NONE = 0,
+    SUB,
+    UP,
+    AVERAGE,
+    PAETH
+} filter_types;
+
 //Chunk
 typedef struct chunk_t{
     unsigned int length; //4 bytes to read

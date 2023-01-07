@@ -23,6 +23,7 @@ char interlace_method; //Currently not used
 static alloc_func zalloc = (alloc_func)0;
 static free_func zfree = (free_func)0;
 
+//!WARNING! The code is temporarily hardcoded to work on palette.png
 int main(int argc, char **argv){
     printf("%s\n", path);
     FILE *fp = fopen(path, "rb");
@@ -73,12 +74,50 @@ int main(int argc, char **argv){
     }
     
     printf("\n");
-    for (size_t i = 0; i < uncompressed_size; i++)
-    {
-        printf("%X ", uncompressed_data[i]);
-    }
     
     //Pixel reconstruction
-    unsigned char *reconstructed_pixels = malloc(sizeof(unsigned char) * (width * height));
+    unsigned char *filtered_pixels = malloc(sizeof(unsigned char) * (width * height));
+    
     int stride = width * BYTES_PIXEL;
+    unsigned char filter_type;
+    
+    int p = 0;
+    int current_pixel = 0;
+    printf("\n");
+    for(int r = 0; r < height; r++){
+        filter_type = uncompressed_data[p];
+        p++;
+        for(int c = 0; c < stride; c++){
+            unsigned char pixel_to_filter = uncompressed_data[p];
+            p++;
+            //Filtering
+            unsigned char filtered_pixel;
+            switch (filter_type){
+            case NONE:
+                filtered_pixel = uncompressed_data[p];
+                break;
+            case SUB:
+                filtered_pixel = uncompressed_data[p] + recon_a(filtered_pixels, stride, r, c);
+                break;
+            case UP:
+                filtered_pixel = uncompressed_data[p] + recon_b(filtered_pixels, stride, r, c);
+                break;
+            case AVERAGE:
+                filtered_pixel = uncompressed_data[p] + (recon_a(filtered_pixels, stride, r, c) + recon_b(filtered_pixels, stride, r, c)) / 2;
+                break;
+            case PAETH:
+                filtered_pixel = uncompressed_data[p] + paeth_prediction(recon_a(filtered_pixels, stride, r, c), recon_b(filtered_pixels, stride, r, c), recon_c(filtered_pixels, stride, r, c));
+                break;
+            default:
+                printf("No filtering type, cope");
+                break;
+            }
+            filtered_pixels[current_pixel] = filtered_pixel & 0xff;
+            printf("%d ", filtered_pixels[current_pixel]);
+            current_pixel++;
+        }
+    }
+
+    //Draw pixels
+    
 }

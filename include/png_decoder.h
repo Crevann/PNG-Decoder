@@ -1,4 +1,7 @@
+#define SDL_MAIN_HANDLED
+
 #include <stdio.h>
+#include <SDL.h>
 
 #define BYTES_PIXEL 4
 
@@ -27,9 +30,13 @@ chunk_t* read_chunk(FILE*);
 //Utilities
 
 int big_endian_to_integer(char[], size_t);
+
 //Pixel reconstruction
 
 int paeth_prediction(int, int, int);
 unsigned char recon_a(unsigned char*, int, int, int);
 unsigned char recon_b(unsigned char*, int, int, int);
 unsigned char recon_c(unsigned char*, int, int, int);
+
+//SDL Window initialization
+int image_graphics_init(SDL_Window **, SDL_Renderer **, SDL_Texture **, int, int, unsigned char *);

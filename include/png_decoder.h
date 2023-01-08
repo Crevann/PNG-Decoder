@@ -39,4 +39,5 @@ unsigned char recon_b(unsigned char*, int, int, int);
 unsigned char recon_c(unsigned char*, int, int, int);
 
 //SDL Window initialization
-int image_graphics_init(SDL_Window **, SDL_Renderer **, SDL_Texture **, int, int, unsigned char *);
+int image_window_init(SDL_Window **, SDL_Renderer **, int, int);
+int image_init(SDL_Renderer **, SDL_Texture **, int, int, unsigned char*);

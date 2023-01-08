@@ -134,7 +134,7 @@ unsigned char recon_c(unsigned char *recon, int stride, int r, int c) {
     }
 }
 
-static int image_graphics_init(SDL_Window **window, SDL_Renderer **renderer, SDL_Texture **texture, int image_width, int image_height, unsigned char *pixel_data) {
+static int image_window_init(SDL_Window **window, SDL_Renderer **renderer, int image_width, int image_height) {
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         SDL_Log("Unable to initialize SDL: %s", SDL_GetError());
         return 1;
@@ -144,7 +144,7 @@ static int image_graphics_init(SDL_Window **window, SDL_Renderer **renderer, SDL
     if (!window) {
         SDL_Log("Unable to create window: %s", SDL_GetError());
     }
-
+    
     *renderer = SDL_CreateRenderer(*window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (!renderer) {
         SDL_Log("Unable to create renderer: %s", SDL_GetError());
@@ -152,15 +152,15 @@ static int image_graphics_init(SDL_Window **window, SDL_Renderer **renderer, SDL
         SDL_Quit();
         return -1;
     }
+}
 
+static int image_init(SDL_Renderer **renderer, SDL_Texture **texture, int image_width, int image_height, unsigned char* pixel_data){
+    unsigned char *pixels = pixel_data;
     int width = image_width;
     int height = image_height;
-    int channels;
-    unsigned char *pixels = pixel_data;
+    int channels = 4;
     if (!pixels) {
         SDL_Log("Unable to open image");
-        SDL_DestroyRenderer(*renderer);
-        SDL_DestroyWindow(*window);
         SDL_Quit();
         return -1;
     }
@@ -172,11 +172,9 @@ static int image_graphics_init(SDL_Window **window, SDL_Renderer **renderer, SDL
         SDL_Log("Unable to create texture: %s", SDL_GetError());
         free(pixels);
         SDL_DestroyRenderer(*renderer);
-        SDL_DestroyWindow(*window);
         SDL_Quit();
         return -1;
     }
-
     SDL_UpdateTexture(*texture, NULL, pixels, width * 4);
     free(pixels);
     return 0;

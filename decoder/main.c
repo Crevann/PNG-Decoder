@@ -18,9 +18,14 @@ char compression_method;  // Currently not used
 char filter_method;       // Currently not used
 char interlace_method;    // Currently not used
 
+// SDL data
+
+SDL_Window *window;
+SDL_Renderer *renderer;
+SDL_Texture *texture;
+
 //! WARNING! The code is temporarily hardcoded to work on palette.png
 int main(int argc, char **argv) {
-    printf("Hello");
     printf("%s\n", path);
     FILE *fp = fopen(path, "rb");
     check_signature(fp, signature);
@@ -49,6 +54,9 @@ int main(int argc, char **argv) {
     char height_data[] = {IHDR_chunk->chunk_data[4], IHDR_chunk->chunk_data[5], IHDR_chunk->chunk_data[6], IHDR_chunk->chunk_data[7]};
     height = big_endian_to_integer(height_data, 4);
     printf("\n%d %d\n", width, height);
+
+    // SDL Initialization
+    image_window_init(&window, &renderer, width, height);
 
     // Gather IDAT data
     chunk_t *IDAT_chunk = chunks[2];
@@ -112,19 +120,24 @@ int main(int argc, char **argv) {
         }
     }
 
-    // Draw pixels and SDL initialization
-    SDL_Window *window;
-    SDL_Renderer *renderer;
-    SDL_Texture *texture;
-    if (image_graphics_init(&window, &renderer, &texture, width, height, filtered_pixels)) {
-        return -1;
-    }
+    // Initialize texture
+    image_init(&renderer, &texture, width, height, filtered_pixels);
 
+    // Loop
     int running = 1;
     while (running) {
-        SDL_RenderPresent(renderer);
+        SDL_Event event;
+        while (SDL_PollEvent(&event)) {
+            if (event.type == SDL_QUIT) {
+                running = 0;
+            }
+        }
+        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+        SDL_RenderClear(renderer);
         SDL_Rect target_rect = {0, 0, width, height};
         SDL_RenderCopy(renderer, texture, NULL, &target_rect);
+
+        SDL_RenderPresent(renderer);
     }
     SDL_Quit();
 }
